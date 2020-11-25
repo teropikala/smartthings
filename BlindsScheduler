@@ -1,0 +1,61 @@
+definition(
+    name: "Blinds Scheduler",
+    namespace: "com.pikala.smartthings.blinds-scheduler",
+    author: "Tero Pikala",
+    description: "SmartApp to schedule blinds",
+    category: "SmartThings Labs",
+    iconUrl: "https://s3.amazonaws.com/initialstate-web-cdn/IS-wordmark-vertica_small.png",
+    iconX2Url: "https://s3.amazonaws.com/initialstate-web-cdn/IS-wordmark-vertical.png",
+    iconX3Url: "https://s3.amazonaws.com/initialstate-web-cdn/IS-wordmark-vertical.png",
+    oauth: [displayName: "Blinds Scheduler", displayLink: "https://secure.pikala.com/blinds-scheduler"])
+
+import groovy.json.JsonSlurper
+
+preferences {
+	section("Choose which blinds to operate...") {
+            input "selectedShades", "capability.switchLevel", title: "Shades", multiple: true, required: true
+    }
+}
+
+
+
+def installed() {
+	atomicState.version = "1.0"
+	
+    setSchedule()
+    
+	log.debug "installed (version $atomicState.version)"	
+}
+
+def updated() {
+	atomicState.version = "1.0"
+
+	setSchedule()
+    
+	log.debug "updated (version $atomicState.version)"
+}
+
+def setSchedule() {
+    schedule("0 0 9 * * ?", openBlinds)
+    schedule("0 0 16 * * ?", closeBlinds)    
+}
+
+def openBlinds() {
+	log.debug "openBlinds (version $atomicState.version)"
+	setLevel(70)    
+}
+
+def closeBlinds() {
+	log.debug "closeBlinds (version $atomicState.version)"
+   	setLevel(0)
+}
+
+def setLevel(def level) {
+    selectedShades.each { it->
+    	it.setLevel(level)
+    }
+}
+
+def uninstalled() {
+	log.debug "uninstalled (version $version)"
+}
